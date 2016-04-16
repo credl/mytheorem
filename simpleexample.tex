@@ -1,0 +1,36 @@
+\documentclass{article}
+
+\usepackage[outsourcebydefault]{mytheorem}						% use this command to outsource theorem proofs by default
+%\usepackage{mytheorem}											% use this command to inline theorem proofs by default
+
+%\renewcommand{\proofsecref}{Section~\ref{sec:arbitrarysec}}	% can be used to redefine the text that refers to the proof section when theorems are exceptionally outsourced
+
+% Declare theorem types here:
+\newMyTheoremType{theorem}{Theorem}
+\newMyTheoremType{lemma}{Lemma}
+
+\begin{document}
+
+	\section{Main Part}
+
+		\addTheorem[Flexible Theorem Proof]{thm:1}{
+			The theorem is always stated in the text.
+			The proof of this theorem appears inline or outsourced, depending on the default setting defined in the \textbackslash{}usepackage\{mytheorem\} command.
+			If it is outsourced, then the theorem itself is stated both inline and before the outsourced proof.
+		}
+
+		\addProof{thm:1}{
+			Proof of Theorem 1 (outsourced or inline depending on the settings).
+		}
+
+	\ifHaveProofs{
+		\appendix
+		\section{Proof Appendix}
+		\label{sec:proofs}
+
+			The outsourced proofs (and the repetition of the according theorems) will follow here:
+
+			\proofs{}
+	}
+		
+	\end{document}

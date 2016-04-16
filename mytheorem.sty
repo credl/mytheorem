@@ -1,0 +1,169 @@
+%
+% This package allows for flexibly positioning theorem proofs
+% either in the text or in a separate proof section in the appendix.
+%
+% Written by Christoph Redl (TU Vienna), February 20 2015
+%
+
+% Dependencies
+\RequirePackage{ifthen}
+\RequirePackage{amsthm}
+
+% Parameters
+\newif\ifdefaultproofinline\defaultproofinlinetrue
+\DeclareOption{outsourcebydefault}{\defaultproofinlinefalse}
+\ProcessOptions\relax
+
+% Proof section
+\newcommand{\proofs}{}	% outsourced proofs
+\newcommand{\ifHaveProofs}[1]{}
+\newcommand{\appendToProofs}[1]{
+	\renewcommand{\ifHaveProofs}[1]{##1}
+	\expandafter\def\expandafter\proofs\expandafter{\proofs { }
+		#1
+		
+		\medskip
+	}
+}
+
+% Theorem styles
+\newcommand{\newMyTheoremStyle}[9]{
+		\newtheoremstyle{#1}{#2}{#3}{#4}{#5}{#6}{#7}{#8}{#9}
+		
+		\expandafter\newcommand\csname mytheorem@abovespace@#1\endcsname{#2}
+		\expandafter\newcommand\csname mytheorem@belowspace@#1\endcsname{#3}
+		\expandafter\newcommand\csname mytheorem@bodyfont@#1\endcsname{#4}
+		\expandafter\newcommand\csname mytheorem@indent@#1\endcsname{#5}
+		\expandafter\newcommand\csname mytheorem@headfont@#1\endcsname{#6}
+		\expandafter\newcommand\csname mytheorem@headpunct@#1\endcsname{#7}
+		\expandafter\newcommand\csname mytheorem@headspace@#1\endcsname{#8}
+		\expandafter\newcommand\csname mytheorem@customheadspec@#1\endcsname{#9}
+	}
+\newcommand{\mytheorem@abovespace}{\topsep}
+\newcommand{\mytheorem@belowspace}{\topsep}
+\newcommand{\mytheorem@bodyfont}{\itshape}
+\newcommand{\mytheorem@indent}{0pt}
+\newcommand{\mytheorem@headfont}{\bfseries}
+\newcommand{\mytheorem@headpunct}{.}
+\newcommand{\mytheorem@headspace}{}
+\newcommand{\mytheorem@customheadspec}{}
+\newcommand{\myTheoremStyle}[1]{
+		\theoremstyle{#1}
+
+		\renewcommand{\mytheorem@abovespace}{\expandafter\csname mytheorem@abovespace@#1\endcsname}
+		\renewcommand{\mytheorem@belowspace}{\expandafter\csname mytheorem@belowspace@#1\endcsname}
+		\renewcommand{\mytheorem@bodyfont}{\expandafter\csname mytheorem@bodyfont@#1\endcsname}
+		\renewcommand{\mytheorem@indent}{\expandafter\csname mytheorem@indent@#1\endcsname}
+		\renewcommand{\mytheorem@headfont}{\expandafter\csname mytheorem@headfont@#1\endcsname}
+		\renewcommand{\mytheorem@headpunct}{\expandafter\csname mytheorem@headpunct@#1\endcsname}
+		\renewcommand{\mytheorem@headspace}{\expandafter\csname mytheorem@headspace@#1\endcsname}
+		\renewcommand{\mytheorem@customheadspec}{\expandafter\csname mytheorem@customheadspec@#1\endcsname}
+	}
+	
+% References to the proof section
+\newcommand{\proofsecref}{Appendix~\ref{sec:proofs}}
+
+% Meta newcommands for defining theorem commands for arbitrary types of theorems
+\newcommand{\newMyTheoremOutsourced}[3]{
+	\newcommand{#1}[3][\empty]{
+		% state theorem
+		\ifthenelse{\equal{##1}{\empty}}
+			{\begin{#2} \label{##2} ##3 \end{#2}}
+			{\begin{#2}[##1] \label{##2} ##3 \end{#2}}
+
+		% restate theorem in the proof section
+		\expandafter\def\expandafter\proofs\expandafter{\proofs { }
+			\ifthenelse{\equal{##1}{\empty}}
+				{\noindent\hspace{\mytheorem@indent}{\mytheorem@headfont{}#3~\ref{##2}.}\mytheorem@headspace{}{\mytheorem@bodyfont{} ##3}}
+				{\noindent\hspace{\mytheorem@indent}{\mytheorem@headfont{}#3~\ref{##2}} (##1){\mytheorem@headfont{}\mytheorem@headpunct{}}\mytheorem@headspace{}{\mytheorem@bodyfont{} ##3}}
+		}
+	}
+}
+\newcommand{\newMyTheoremOutsourcedOnly}[3]{
+	\newcommand{#1}[3][\empty]{
+		% restate the theorem only in the proof section
+		\expandafter\def\expandafter\proofs\expandafter{\proofs { }
+			\ifthenelse{\equal{##1}{\empty}}
+				{\begin{#2} \label{##2} ##3 \end{#2}}
+				{\begin{#2}[##1] \label{##2} ##3 \end{#2}}
+		}
+	}
+}
+\newcommand{\newMyTheoremInline}[3]{
+	\newcommand{#1}[3][\empty]{
+		% state theorem
+		\ifthenelse{\equal{##1}{\empty}}
+			{\begin{#2} \label{##2} ##3 \end{#2}}
+			{\begin{#2}[##1] \label{##2} ##3 \end{#2}}
+	}
+}
+
+% redirection of \newMyTheorem depending on the default position of theorems
+\ifdefaultproofinline
+	\newcommand{\newMyTheorem}{\newMyTheoremInline}
+\else
+	\newcommand{\newMyTheorem}{\newMyTheoremOutsourced}
+\fi
+
+% Meta newcommands for defining proof commands for arbitrary types of theorems
+\newcommand{\addProofOutsourced}[2]{
+	\renewcommand{\ifHaveProofs}[1]{##1}
+	\expandafter\def\expandafter\proofs\expandafter{\proofs { }
+		\begin{proof}
+		\label{prf:#1}
+		#2
+		\end{proof}
+	}
+	\ifdefaultproofinline
+		\begin{proof}
+			\renewcommand{\qedsymbol}{}
+			See \proofsecref, page~\pageref{prf:#1}.
+		\end{proof}
+	\fi
+}
+
+\newcommand{\addProofOutsourcedOnly}[2]{
+	\renewcommand{\ifHaveProofs}[1]{##1}
+	\expandafter\def\expandafter\proofs\expandafter{\proofs { }
+		\begin{proof}
+		\label{prf:#1}
+		#2
+		\end{proof}
+	}
+}
+\newcommand{\addProofInline}[2]{
+	\begin{proof}
+	\label{prf:#1}
+	#2
+	\end{proof}
+}
+
+% redirection of \addProof depending on the default position of theorems
+\ifdefaultproofinline
+	\newcommand{\addProof}[2]{
+		\begin{proof}
+		\label{prf:#1}
+		#2
+		\end{proof}
+	}
+\else
+	\newcommand{\addProof}[2]{
+		\renewcommand{\ifHaveProofs}[1]{##1}
+		\expandafter\def\expandafter\proofs\expandafter{\proofs { }
+			\begin{proof}
+			\label{prf:#1}
+			#2
+			\end{proof}
+		}
+	}
+\fi
+
+% Facade command, which allow for defining several other commands for each theorem type using the above commands.
+% \newMyTheoremType{lemma}{Lemma} is used to declare a new theorem environment of amsthm type "lemma" and caption "Lemma"
+\newcommand{\newMyTheoremType}[2]{
+	\newtheorem{#1}{#2}
+	\expandafter\newMyTheoremOutsourced\csname add#2Outsourced\endcsname{#1}{#2}
+	\expandafter\newMyTheoremOutsourcedOnly\csname add#2OutsourcedOnly\endcsname{#1}{#2}
+	\expandafter\newMyTheoremInline\csname add#2Inline\endcsname{#1}{#2}
+	\expandafter\newMyTheorem\csname add#2\endcsname{#1}{#2}
+}

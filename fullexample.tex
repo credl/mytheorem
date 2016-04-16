@@ -1,0 +1,153 @@
+\documentclass{article}
+
+\usepackage[outsourcebydefault]{mytheorem}						% use this command to outsource theorem proofs by default
+%\usepackage{mytheorem}											% use this command to inline theorem proofs by default
+
+%\renewcommand{\proofsecref}{Section~\ref{sec:arbitrarysec}}	% can be used to redefine the text that refers to the proof section when theorems are exceptionally outsourced
+
+% Declare theorem types here:
+\newMyTheoremType{theorem}{Theorem}
+\newMyTheoremType{lemma}{Lemma}
+
+% Now the following commands are available for declaring theorems (analogously for lemmata and any other types declared with \newMyTheoremType)
+% 
+% addTheoremInline/addProofInline:
+% 		Allows for adding theorems whose proofs are always inline, independent of the default setting.
+% 
+% addTheoremOutsourcedOnly/addProofOutsourcedOnly:
+% 		Allows for adding theorems which appear only in the outsourced section (also their proofs), independent of default setting.
+% 		In the text, not even the theorem is stated.
+% 		This is intended to be used for lemmata which are only relevant in the proofs of other theorems and should therefore not occur in the text.
+% 
+% addTheoremOutsourced/addProofOutsourced:
+% 		Allows for adding theorems whose proofs are always outsourced, independent of default setting.
+% 
+% addTheorem/addProof:
+% 		Allows for placing proofs of theorems flexibly either inline or outsourced, depending on the setting of default setting.
+
+\title{mytheorem.sty}
+\author{Christoph Redl}
+
+\begin{document}
+
+	\maketitle
+	
+	\section{Introduction}
+	
+		This package allows for flexibly positioning theorem proofs
+		either in the text or in a separate proof section in the appendix.
+
+		To register a type of a theorem (e.g.~for lemmata, propositions, theorems, examples, etc),
+		use the command
+		\begin{center}
+			\textbackslash{}newMyTheoremType\{[t]\}\{[T]\}
+		\end{center}
+		where \emph{[t]} is to be replaced by the type of theorem from the amsthm.sty package
+		(e.g.~\emph{lemma}, \emph{theorem}, etc), and \emph{[T]} by the desired human-readable theorem name (e.g.~\emph{Lemma}, \emph{Theorem}, etc).
+		This will then define the commands \textbackslash{}add[T], \textbackslash{}add[T]Inline, \textbackslash{}add[T]Outsourced, \textbackslash{}add[T]OutsourcedOnly,
+		which can be used to state theorems as described next.
+		
+		The command \textbackslash{}addProof is always available and is used to define proofs for previously stated theorems (of any kind).
+
+		For customizing theorem styles, use the commands \textbackslash{}newMyTheoremStyle and \textbackslash{}myTheoremStyle
+		instead of \textbackslash{}newtheoremstyle and \textbackslash{}theoremstyle. They expect exactly the same parameters as the original methods
+		from the amsthm.sty package.
+		
+	\section{Supported Types of Proofs}
+
+		The package supports four types of proof positioning:
+		\begin{enumerate}
+			\item Theorems in the text with \textbf{flexibly positioned proofs}. All such proofs can easily be included in the text or outsourced by changing a single flag for the whole document.
+
+				Commands are \\
+				\textbackslash{}addTheorem (or \textbackslash{}addLemma, etc) and \\
+				\textbackslash{}addProof.
+			\item Theorems in the text with proofs which are \textbf{always inline} (e.g. for short proofs).
+
+				Commands are \\
+				\textbackslash{}addTheoremInline (or \textbackslash{}addLemmaInline, etc) and \\
+				\textbackslash{}addProofInline.
+			\item Theorems in the text with proofs which are \textbf{always outsourced} (e.g. very long proofs).
+
+				Commands are \\
+				\textbackslash{}addTheoremOutsourced (or \textbackslash{}addLemmaOutsourced, etc) and \\
+				\textbackslash{}addProofOutsourcedOnly.
+			\item Theorems which are, together with their proofs, \textbf{only stated in the appendix} (e.g. lemmata).
+
+				Commands are \\
+				\textbackslash{}addTheoremOutsourcedOnly (or \textbackslash{}addLemmaOutsourcedOnly, etc) and \\
+				\textbackslash{}addProofOutsourced.
+		\end{enumerate}
+		
+		Note that items 1, 2 and 3 will always state the theorem in the text but only the positioning of the proof differs,
+		while item 4 concerns both the proof and the theorem.
+		In particular, for item 3 only the proof will be outsourced (independent of the default setting),
+		while for item 4 also the theorem will appear in the appendix only (also independent of the default setting).
+		Item 3 is intended to be used when the theorem is relevant in the text but the proof is not or very long,
+		while item 4 should be used when also the theorem is only relevant in the proof section (e.g.~because it is a lemma which is used in other proofs).
+
+	\section{Examples}
+
+		Some examples follow.
+		It is suggested to compile the document twice using either the option from line 3 or 4 to see how the setting influences
+		the positioning of the proofs.
+
+		\addTheorem[Flexible Theorem Proof]{thm:1}{
+			This example refers to item 1 in the list.
+			The theorem is always stated in the text.
+			The proof of this theorem appears inline or outsourced, depending on the default setting.
+			If it is outsourced, then the theorem itself is stated both inline and before the outsourced proof.
+		}
+
+		\addProof{thm:1}{
+			Proof of Theorem 1 (outsourced or inline depending on the settings).
+		}
+
+		\addTheoremInline[Inline Theorem Proof]{thm:2}{
+			This example refers to item 2 in the list.
+			The theorem is always stated in the text.
+			The proof of this theorem always appears inline, independent of the default setting.
+		}
+
+		\addProofInline{thm:2}{
+			Proof of Theorem 2 (always inline).
+		}
+
+		\addLemmaOutsourcedOnly[Theorem which appears only in the outsourced section]{lemma:1}{
+			This example refers to item 4 in the list.
+			This lemma \emph{and} its proof always \emph{both} appear outsourced, independent of the default setting.
+			It is only relevant in the outsourced section, e.g., for proving Theorem~\ref{thm:3}.
+		}
+
+		\addProofOutsourcedOnly{lemma:1}{
+			Proof of Lemma 1 (theorem and proof always outsourced).
+		}
+
+		\appendToProofs{
+			This sentence is added to the proof section and allows for adding explanations of theorems which are only relevant in the proof section
+			(e.g. in proofs of other theorems).
+		}
+
+		\addTheoremOutsourced[Outsourced Theorem Proof]{thm:3}{
+			This example refers to item 3 in the list.
+			The theorem is always stated in the text.
+			The proof of this theorem always appears outsourced, independent of the default setting.
+			If the default setting is inline (i.e., proofs are \emph{usually} inline), then it is explicitly noted in the text that this proof is exceptionally outsourced.
+			If the default setting is outsourced (i.e., proofs are outsourced anyway), then this it not noted.
+		}
+
+		\addProofOutsourced{thm:3}{
+			Proof of Theorem 3 (always outsourced) using Lemma~\ref{lemma:1}.
+		}
+
+	\ifHaveProofs{
+		\appendix
+		\section{Proof Appendix}
+		\label{sec:proofs}
+
+			The outsourced proofs (and the repetition of the according theorems) will follow here:
+
+			\proofs{}
+	}
+
+\end{document}
